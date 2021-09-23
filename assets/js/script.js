@@ -32,7 +32,7 @@ var loadTasks = function () {
   }
 
   // loop over object properties
-  $.each(tasks, function (list, arr) {
+  $.each(tasks, function(list, arr) {
     console.log(list, arr);
     // then loop over sub-array
     arr.forEach(function (task) {
@@ -44,6 +44,72 @@ var loadTasks = function () {
 var saveTasks = function () {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
+
+//sortable
+$(".card .list-group").sortable({
+  connectWith: $(".card .list-group"),
+  scroll: false,
+  tolerance: "pointer",
+  helper: "clone",
+  activate: function(event, ui) {
+    console.log(ui);
+  },
+  deactivate: function(event, ui) {
+    console.log(ui);
+  },
+  over: function(event) {
+    console.log(event);
+  },
+  out: function(event) {
+    console.log(event);
+  },
+  update: function() {
+    //array to store the task data
+    var tempArr = [];
+    //loop over current set of children in sortable lists
+    $(this)
+      .children()
+      .each(function() {
+      tempArr.push({
+      text: $(this)
+        .find("p")
+        .text()
+        .trim(),
+      date: $(this)
+        .find("span")
+        .text()
+        .trim()
+      });
+    });  
+    //trim down list's ID to match object property
+    var arrName = $(this)
+    .attr("id")
+    .replace("list-", "");
+
+    //update array on tasks object property
+    tasks[arrName] = tempArr;
+    saveTasks();
+  },
+  stop: function(event) {
+    $(this).removeClass("dropover");
+  }
+});
+
+$("#trash").droppable({
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+  drop: function(event, ui) {
+    ui.draggable.remove();
+    console.log("drop");
+  },
+  over: function(event, ui) {
+    console.log("over");
+  },
+  out: function(event, ui) {
+    console.log(ui)
+  }
+});
+
 $(".list-group").on("click" , "p" , function() {
   var text = $(this)
   .text()
@@ -66,7 +132,7 @@ $(".list-group").on("blur", "textearea", function() {
   .attr("id")
   .replace("list-", "");
 
-  // get the task's position in the list of other li elements
+  //get the task's position in the list of other li elements
   var index = $(this)
   .closest(".list-group-item")
   .index()
@@ -259,7 +325,7 @@ $("#remove-tasks").on("click", function () {
   }
   saveTasks();
 });
-
+  
 // load tasks for the first time
 loadTasks();
 
